@@ -1,0 +1,121 @@
+---
+import Layout from '../layouts/Layout.astro';
+const title = 'Línea editorial';
+const description = 'Qué publica indie, con qué criterio se recomienda una herramienta, qué compromisos de honestidad asumo y qué no vas a encontrar aquí.';
+const url = 'https://indie.pruebapublica.com';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Línea editorial',
+  url: `${url}/linea-editorial/`,
+  inLanguage: 'es-ES',
+  isPartOf: { '@type': 'WebSite', name: 'indie', url },
+  about: { '@type': 'Blog', name: 'indie', url, author: { '@type': 'Person', name: 'M. Castillo' } },
+};
+---
+<Layout title={title} description={description} url="/linea-editorial/">
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <main class="mx-auto max-w-3xl px-4 py-12">
+    <header class="mb-12 border-b border-slate-200 pb-8 dark:border-slate-800">
+      <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Línea editorial</p>
+      <h1 class="mt-3 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+        Qué se publica aquí, cómo se escribe y qué no vas a encontrar
+      </h1>
+      <p class="mt-5 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+        En el <a href="/posts/que-significa-indie-en-linux/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">primer artículo</a> conté qué significa «indie» en el mundo Linux. Quedaba la pregunta lógica: ¿y qué hace este blog con esa idea? Esto es la respuesta, y la escribo con un solo artículo publicado, a propósito.
+      </p>
+    </header>
+
+    <div class="space-y-12 text-slate-700 dark:text-slate-300">
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">La idea</h2>
+        <p class="mt-3 text-lg leading-relaxed">
+          <strong class="text-slate-900 dark:text-white">indie</strong> escribe sobre herramientas que resuelven un problema sin ruido, y lo hace con el mismo criterio con el que defiende esas herramientas: pequeño, claro y comprobable. Un blog sobre software hecho a mano no puede ser una máquina de producir contenido.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Los cuatro ejes</h2>
+        <ol class="mt-4 space-y-5">
+          <li>
+            <p class="font-semibold text-slate-900 dark:text-white">1. Linux sin ruido</p>
+            <p class="mt-1 leading-relaxed">Debian estable como base, un servidor pequeño y servicios que se entienden leyendo su configuración. Guías de instalación, mantenimiento, actualizaciones, seguridad básica y las decisiones aburridas que hacen que un sistema siga funcionando dentro de tres años.</p>
+          </li>
+          <li>
+            <p class="font-semibold text-slate-900 dark:text-white">2. Self-hosting y homelab</p>
+            <p class="mt-1 leading-relaxed">Montar lo que necesitas en tu propia máquina: copias de seguridad, DNS, notas, un proxy inverso. La pregunta de fondo siempre es la misma: ¿esto te da más control o solo más trabajo?</p>
+          </li>
+          <li>
+            <p class="font-semibold text-slate-900 dark:text-white">3. Herramientas indie que merecen la pena</p>
+            <p class="mt-1 leading-relaxed">Utilidades de terminal, aplicaciones de escritorio, servicios ligeros, proyectos de una sola persona que hacen una cosa y la hacen bien. Y también sus riesgos: abandono, documentación escasa, dependencia de un único mantenedor.</p>
+          </li>
+          <li>
+            <p class="font-semibold text-slate-900 dark:text-white">4. Terminal, automatización y escritorio</p>
+            <p class="mt-1 leading-relaxed">Scripts, flujos de trabajo y configuraciones que ahorran tiempo de verdad, no los que lo ahorran en una captura de pantalla.</p>
+          </li>
+        </ol>
+        <p class="mt-5 leading-relaxed">Quedan fuera las novedades del día, las comparativas de hardware de gama alta y cualquier cosa que solo tenga sentido con una cuenta de pago. Si el tema se aleja de estos cuatro ejes, probablemente no es para este blog.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Qué formatos vas a encontrar</h2>
+        <ul class="mt-4 space-y-3 leading-relaxed">
+          <li><strong class="text-slate-900 dark:text-white">Guías probadas.</strong> Pasos reproducibles, comandos reales y lo que sale por pantalla. Si un paso falla, se cuenta qué falló.</li>
+          <li><strong class="text-slate-900 dark:text-white">Impresiones de uso real.</strong> Qué pasa después de usar una herramienta semanas o meses, no tras una tarde de entusiasmo.</li>
+          <li><strong class="text-slate-900 dark:text-white">Mapas y comparativas honestas.</strong> Alternativas para un mismo problema, con sus límites explicados y sin ranking forzado de «las 10 mejores».</li>
+          <li><strong class="text-slate-900 dark:text-white">Notas cortas.</strong> Un hallazgo, un truco o una advertencia que no necesita 2.000 palabras.</li>
+        </ul>
+        <p class="mt-5 leading-relaxed">El tamaño lo decide el tema. Habrá artículos de tres minutos y otros de veinte. Lo que no habrá es relleno para llegar a un número de palabras.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Cómo decido qué recomendar</h2>
+        <p class="mt-3 leading-relaxed">Antes de escribir que una herramienta merece la pena, pasa por seis filtros. No es una puntuación ni una fórmula: es un filtro. Los detallo, con un caso práctico, en <a href="/posts/como-evaluar-herramienta-indie-6-filtros/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">«Cómo decido si una herramienta indie merece la pena»</a>.</p>
+        <ol class="mt-4 list-decimal space-y-2 pl-5 leading-relaxed">
+          <li>¿Resuelve un problema concreto?</li>
+          <li>¿Se puede entender (código, configuración, instalación)?</li>
+          <li>¿Mis datos salen conmigo, en formatos abiertos?</li>
+          <li>¿Funciona sin cuenta obligatoria ni telemetría?</li>
+          <li>¿Se ve el mantenimiento (actividad, issues, releases)?</li>
+          <li>¿La he usado yo? Este no se negocia.</li>
+        </ol>
+        <p class="mt-5 leading-relaxed">Cuando una herramienta no pasa alguno de los filtros pero aun así es útil, la recomendación incluirá el aviso. Prefiero un «sirve, pero ojo con esto» a un entusiasmo que no he comprobado.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Cómo se escribe</h2>
+        <p class="mt-3 leading-relaxed">Práctico, honesto y directo. Práctico, porque cada artículo debería dejarte algo que puedas hacer o decidir hoy. Honesto, porque si algo no funciona se dice, y si me equivoco se corrige con la corrección visible. Directo, porque tu tiempo es limitado: sin introducciones de 400 palabras ni titulares que prometen más de lo que hay dentro.</p>
+        <p class="mt-3 leading-relaxed">Escribe una persona, desde la práctica diaria con Linux. No hay equipo editorial ni departamento de contenidos. Eso tiene costes (el ritmo será el que sea) y una ventaja que no pienso desperdiciar: puedo decir «esto lo he probado» y que sea literal.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Lo que no vas a encontrar</h2>
+        <ul class="mt-4 space-y-3 leading-relaxed">
+          <li><strong class="text-slate-900 dark:text-white">Clickbait ni listas infladas.</strong> Nada de «7 herramientas que cambiarán tu vida».</li>
+          <li><strong class="text-slate-900 dark:text-white">Reseñas sin uso real.</strong> Si no la he probado, no la recomiendo.</li>
+          <li><strong class="text-slate-900 dark:text-white">Guerras de distribuciones o de editores.</strong> Interesa por qué eliges, no quién gana.</li>
+          <li><strong class="text-slate-900 dark:text-white">Trucos para robarte la atención.</strong> Sin ventanas emergentes, sin cuentas obligatorias, sin cuenta atrás.</li>
+          <li><strong class="text-slate-900 dark:text-white">Recomendaciones compradas.</strong> Si algún día hay un enlace de afiliado o algo a cambio, se dirá arriba, no en la letra pequeña.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Independencia y dinero</h2>
+        <p class="mt-3 leading-relaxed">indie es gratis y quiero que lo siga siendo. La forma más sencilla de apoyarlo es suscribirte: es gratis y me dice que esto merece la pena. Si además quieres echar una mano, hay un <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">café en Ko-fi</a>. Nada de eso condiciona lo que se escribe, y los seis filtros se aplican igual a una herramienta de un amigo que a una de un desconocido.</p>
+        <p class="mt-3 leading-relaxed">El blog no depende de una plataforma social ni de un algoritmo: tiene <a href="/rss.xml" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">RSS</a>, <a href="/archivo/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">archivo completo</a> y <a href="/buscar/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">buscador propio</a>. El correo llega cuando hay algo que merece la pena; no prometo una cadencia fija.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Correcciones y participación</h2>
+        <p class="mt-3 leading-relaxed">Los errores se corrigen y se anotan en la <a href="/correcciones/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">página de correcciones</a>. Si encuentras uno, <a href="/contacto/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">escríbeme</a>: prefiero que me lo digan a que se quede.</p>
+        <p class="mt-3 leading-relaxed">También quiero que el blog se alimente de lo que tú usas. Si tienes una herramienta pequeña que te ha salvado un fin de semana, si eres autor de un proyecto indie y quieres que se hable de él con honestidad (incluidos sus puntos débiles), o si echas en falta un tema, escribe. No prometo publicarlo todo; prometo leerlo todo.</p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Por dónde seguir</h2>
+        <p class="mt-3 leading-relaxed">Si es tu primera visita, <a href="/empieza-aqui/" class="font-medium text-accent-700 underline underline-offset-4 dark:text-accent-400">Empieza aquí</a> ordena el recorrido en tres pasos: qué significa «indie», cómo es un Linux sin ruido y cómo empezar con el self-hosting. Lo que viene: guías de self-hosting básico (copias de seguridad, proxy inverso, monitorización ligera), repasos de herramientas de terminal que uso cada día y análisis de proyectos indie con sus riesgos a la vista.</p>
+        <p class="mt-5 text-lg font-medium text-slate-900 dark:text-white">Pequeño, claro, comprobable. Esa es la línea editorial. Si alguna vez dejo de cumplirla, avísame.</p>
+      </section>
+    </div>
+  </main>
+</Layout>
