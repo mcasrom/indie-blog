@@ -1,0 +1,63 @@
+---
+// src/pages/categorias/index.astro
+// Índice temático del blog: agrupa los posts por etiquetas (tags) con ≥2
+// artículos, enlazando a su página /tags/<slug>. La categoría agrupa por tema
+// en todos los posts (género del blog); la segmentación real es temática y
+// la dan las etiquetas.
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// Normaliza un tag a su slug de URL (idéntico a tags/[tag].astro)
+function tagSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const posts = (await getCollection('posts')).filter((p) => !p.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Agrupación por etiqueta (solo las que tienen ≥2 artículos)
+const porTag = new Map<string, typeof posts>();
+for (const p of posts) {
+  for (const t of p.data.tags || []) {
+    if (!porTag.has(t)) porTag.set(t, []);
+    porTag.get(t)!.push(p);
+  }
+}
+const temas = [...porTag.entries()]
+  .filter(([, items]) => items.length >= 2)
+  .sort((a, b) => b[1].length - a[1].length);
+const todasLasTags = porTag.size;
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<Layout title="Categorías · Temas del blog" url="/categorias/">
+  <h1 class="font-serif text-4xl font-bold text-slate-900 dark:text-white">Temas del blog</h1>
+  <p class="mt-2 text-slate-600 dark:text-slate-400">
+    {temas.length} áreas temáticas con {todasLasTags} etiquetas en total · cada una enlaza a su página de artículos.
+  </p>
+  <div class="mt-8 space-y-10">
+    {temas.map(([tag, items]) => (
+      <section>
+        <h2 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">
+          <a href={`/tags/${tagSlug(tag)}/`} class="capitalize hover:text-accent-600 dark:hover:text-accent-400">
+            {tag}
+          </a>
+          <span class="ml-2 text-sm font-normal text-slate-400">{items.length} artículo{items.length !== 1 ? 's' : ''}</span>
+        </h2>
+        <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+          {items.map((p) => (
+            <li class="flex items-baseline gap-3 py-3">
+              <span class="shrink-0 text-xs text-slate-400">{fmt.format(p.data.pubDate)}</span>
+              <a href={`/posts/${p.slug}/`} class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-200 dark:hover:text-accent-400">
+                {p.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Layout>

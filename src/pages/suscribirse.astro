@@ -1,0 +1,46 @@
+---
+// src/pages/suscribirse.astro
+import Layout from '../layouts/Layout.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+const siteUrl = 'https://indie.pruebapublica.com';
+---
+<Layout
+  title="Avisos — indie"
+  description="Elige de qué quieres que te avise: Linux, terminal, automatización, self-hosting, homelab o software indie. Te escribo solo cuando publique de esos temas. Gratis, sin spam, baja en un clic."
+  url="/suscribirse"
+  wide
+>
+  <section class="mx-auto max-w-2xl py-12 text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Boletín por temas</p>
+    <h1 class="mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+      Te aviso cuando publique de…
+    </h1>
+    <p class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300">
+      Elige los temas que te interesan. Te escribo <b>solo cuando publique de ellos</b> —un artículo nuevo,
+      un dato que cambia—, con la fuente enlazada. Sin agenda y sin ruido.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-xl">
+    <NewsletterForm variante="card" conTemas={true} />
+  </section>
+
+  <section class="mx-auto mt-10 max-w-xl">
+    <ul class="space-y-3 text-slate-700 dark:text-slate-300">
+      <li>🎯 <b>Eliges tú</b>: solo te aviso de los temas que marques. Nada de correos que no te importan.</li>
+      <li>🔗 <b>Fuentes enlazadas</b>: verificables, no “según dicen”.</li>
+      <li>🧭 <b>Dato separado de opinión</b>: lo que se mide y lo que se interpreta, distinguido.</li>
+      <li>🐧 <b>Linux primero</b>: Debian, terminal y herramientas pequeñas que puedes probar hoy.</li>
+    </ul>
+    <div class="mt-8 rounded-2xl border border-accent-200 bg-accent-50/40 p-5 dark:border-accent-800 dark:bg-accent-950/20">
+      <p class="text-sm text-slate-700 dark:text-slate-300">
+        💚 <b>Suscribirte es la forma más sencilla de apoyar el proyecto.</b> Este blog lo lleva una sola
+        persona, sin publicidad ni muros de pago. Un correo solo cuando hay algo que merece la pena es
+        gratis para ti y me dice que esto merece la pena seguir haciéndolo.
+      </p>
+    </div>
+    <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      Doble confirmación (te llega un correo para confirmar), gratis y <b>baja en un clic</b>. Nunca cedo tu correo.
+    </p>
+  </section>
+</Layout>

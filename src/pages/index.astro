@@ -1,0 +1,153 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import { getCollection } from 'astro:content';
+import { getLikes } from '../lib/db';
+import { readingTimeLabel } from '../lib/readingTime';
+import { getIndiePosts } from '../lib/indie';
+
+const posts = await getIndiePosts(getCollection);
+const destacado = posts.find((p) => p.slug === 'que-es-este-blog') || posts[0];
+const lecturaDe = (p: (typeof posts)[number]) => (p.body ? readingTimeLabel(p.body) : '');
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const siteUrl = 'https://indie.pruebapublica.com';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'indie',
+  url: siteUrl,
+  description: 'Un espacio práctico y sin ruido sobre Linux, Debian, self-hosting, homelab y herramientas indie.',
+  publisher: { '@type': 'Organization', name: 'indie', url: siteUrl },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/buscar?q={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
+  blog: {
+    '@type': 'Blog',
+    blogPost: posts.map((p) => ({
+      '@type': 'BlogPosting',
+      headline: p.data.title,
+      datePublished: p.data.pubDate.toISOString(),
+      url: `${siteUrl}/posts/${p.slug}/`,
+      image: p.data.image ? `${siteUrl}${p.data.image}` : `${siteUrl}/og-preview.png`,
+      author: { '@type': 'Person', name: 'M. Castillo' },
+    })),
+  },
+};
+---
+<Layout title="Linux, self-hosting y software hecho a mano" description="Un espacio práctico y sin ruido sobre Linux, Debian, self-hosting, homelab y herramientas indie." url="/" wide>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <!-- Hero -->
+  <section class="mx-auto max-w-3xl py-10 text-center">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">
+      Linux · self-hosting · homelab
+    </p>
+    <h1 class="mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+      Linux, self-hosting y software hecho a mano
+    </h1>
+    <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
+      Un espacio práctico y sin ruido sobre Linux, Debian, self-hosting, homelab y herramientas indie que sí merecen la pena.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="#articulos"
+        class="rounded-full bg-accent-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700 dark:hover:bg-accent-500"
+      >
+        Leer últimos artículos
+      </a>
+      <a
+        href="/empieza-aqui/"
+        class="rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-accent-600 hover:text-accent-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-400 dark:hover:text-accent-400"
+      >
+        ¿Primera vez? Empieza aquí
+      </a>
+      <a
+        href="https://bsky.app/profile/pruebapublica.bsky.social"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-accent-600 hover:text-accent-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-400 dark:hover:text-accent-400"
+      >
+        Síguenos en Bluesky
+      </a>
+      <a
+        href="https://mastodon.social/@PruebaPublica"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-accent-600 hover:text-accent-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-400 dark:hover:text-accent-400"
+      >
+        Mastodon
+      </a>
+      <a
+        href="https://x.com/pruebapublicaX"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-accent-600 hover:text-accent-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-400 dark:hover:text-accent-400"
+      >
+        X
+      </a>
+    </div>
+  </section>
+
+  <section class="mx-auto mb-12 max-w-2xl">
+    <NewsletterForm variante="card" />
+  </section>
+
+  <div class="grid gap-10 lg:grid-cols-[1fr_320px]">
+    <div>
+      {destacado && (
+        <section class="mb-10 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+          <span class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Destacado</span>
+          <a href={`/posts/${destacado.slug}/`} class="mt-2 block">
+            <h2 class="font-serif text-3xl font-bold leading-tight text-slate-900 transition hover:text-accent-700 dark:text-white dark:hover:text-accent-400">
+              {destacado.data.title}
+            </h2>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">{destacado.data.description}</p>
+            <span class="mt-3 inline-block text-sm text-slate-500">
+              {fmt.format(destacado.data.pubDate)} · {destacado.data.categoria} · ⏱ {lecturaDe(destacado)} · ♥ {getLikes(destacado.slug)}
+            </span>
+          </a>
+        </section>
+      )}
+
+      <section id="articulos">
+        <h2 class="mb-6 border-b border-slate-200 pb-2 font-serif text-2xl font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+          Artículos
+        </h2>
+        <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+          {posts.slice(0, 24).map((post) => (
+            <li class="py-6">
+              <a href={`/posts/${post.slug}/`} class="group block">
+                <span class="text-sm text-slate-500">{fmt.format(post.data.pubDate)} · {post.data.categoria} · ⏱ {lecturaDe(post)}</span>
+                <h3 class="mt-1 font-serif text-2xl font-bold text-slate-900 transition group-hover:text-accent-700 dark:text-white dark:group-hover:text-accent-400">
+                  {post.data.title}
+                </h3>
+                <p class="mt-1 text-slate-600 dark:text-slate-300">{post.data.description}</p>
+                <span class="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-accent-600 dark:text-accent-400">
+                  Leer artículo
+                  <span class="transition group-hover:translate-x-1">→</span>
+                </span>
+                {post.data.tags.length > 0 && (
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {post.data.tags.map((tag) => (
+                      <a href={`/tags/${tag.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}
+                         class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 transition hover:bg-accent-600 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-accent-400">#{tag}</a>
+                    ))}
+                  </div>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a href="/archivo/" class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-accent-600 hover:text-accent-700 dark:text-accent-400 dark:hover:text-accent-300">
+          Ver todo el archivo <span aria-hidden="true">→</span>
+        </a>
+      </section>
+    </div>
+
+    <Sidebar />
+  </div>
+</Layout>

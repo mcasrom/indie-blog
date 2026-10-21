@@ -1,0 +1,84 @@
+---
+// src/components/NewsletterForm.astro
+// Formulario de suscripción: guarda el email (y, si `conTemas`, los temas) vía /api/subscribe.
+import { TEMAS_NEWSLETTER } from '../lib/newsletter';
+const { variante = 'inline', conTemas = false } = Astro.props as {
+  variante?: 'inline' | 'card';
+  conTemas?: boolean;
+};
+const titulo = conTemas ? 'Te aviso cuando publique de…' : 'Recibe lo que publico';
+const texto = conTemas
+  ? 'Elige los temas que te interesan: te escribo solo cuando publique de ellos. Gratis, sin spam; baja en un clic.'
+  : 'Un correo al mes con lo que merece la pena. Gratis, sin spam; baja en un clic.';
+const apoyo = 'Suscribirte es la forma más sencilla de apoyar el proyecto: es gratis y me dice que esto merece la pena.';
+---
+<div class="newsletter {variante === 'card' ? 'rounded-2xl border border-accent-200 bg-accent-50/40 p-6 dark:border-accent-800 dark:bg-accent-950/20' : ''}">
+  <h3 class="font-serif text-xl font-bold text-slate-900 dark:text-white">✉️ {titulo}</h3>
+  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">{texto}</p>
+  <form class="newsletter-form mt-4" data-variante={variante}>
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <input
+        type="email"
+        name="email"
+        required
+        placeholder="tu@email.com"
+        autocomplete="email"
+        class="w-full rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-accent-600 focus:ring-2 focus:ring-accent-600/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+      />
+      <button
+        type="submit"
+        class="shrink-0 rounded-full bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-700 dark:hover:bg-accent-500"
+      >
+        {conTemas ? 'Activar avisos' : 'Recibir el boletín'}
+      </button>
+    </div>
+    {conTemas && (
+      <fieldset class="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+        {TEMAS_NEWSLETTER.map((t) => (
+          <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <input type="checkbox" name="temas" value={t.slug} class="h-4 w-4 rounded border-slate-300 text-accent-600 focus:ring-accent-600/30 dark:border-slate-600 dark:bg-slate-800" />
+            {t.label}
+          </label>
+        ))}
+      </fieldset>
+    )}
+  </form>
+  <p class="newsletter-msg mt-2 hidden text-sm font-medium"></p>
+  <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">💚 {apoyo}</p>
+</div>
+
+<script>
+  document.querySelectorAll('.newsletter-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;
+      const wrap = form.closest('.newsletter') as HTMLElement;
+      const msg = wrap.querySelector('.newsletter-msg') as HTMLElement;
+      const email = emailInput.value.trim();
+      if (!email) return;
+      const temas = Array.from(form.querySelectorAll('input[name="temas"]:checked')).map(
+        (c) => (c as HTMLInputElement).value
+      );
+      msg.className = 'newsletter-msg mt-2 text-sm font-medium';
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, temas }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = data.existia ? 'Ya estabas suscrito. ¡Gracias!' : '¡Listo! Revisa tu correo para confirmar.';
+          msg.classList.add('text-accent-600', 'dark:text-accent-400');
+          emailInput.value = '';
+        } else {
+          msg.textContent = data.message || 'No se pudo suscribir. Inténtalo de nuevo.';
+          msg.classList.add('text-red-600', 'dark:text-red-400');
+        }
+      } catch {
+        msg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        msg.classList.add('text-red-600', 'dark:text-red-400');
+      }
+    });
+  });
+</script>

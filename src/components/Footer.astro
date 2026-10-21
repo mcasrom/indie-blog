@@ -1,0 +1,31 @@
+---
+// src/components/Footer.astro
+import SocialIcons from './SocialIcons.astro';
+import { version } from '../../package.json';
+---
+<footer class="border-t border-slate-200 py-10 dark:border-slate-800">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4">
+    <div class="flex items-center gap-6">
+      <a href="/" class="flex flex-col items-center leading-none">
+        <span class="font-serif text-2xl font-bold text-slate-900 dark:text-white">indie</span>
+        <span class="mt-1 text-xs text-slate-500 dark:text-slate-400">Linux, self-hosting y software hecho a mano</span>
+      </a>
+      <SocialIcons />
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+      <a href="/empieza-aqui/" class="hover:text-accent-600 dark:hover:text-accent-400">Empieza aquí</a>
+      <a href="/buscar" class="hover:text-accent-600 dark:hover:text-accent-400">Buscar</a>
+      <a href="/sobre" class="hover:text-accent-600 dark:hover:text-accent-400">Sobre el proyecto</a>
+      <a href="/correcciones/" class="hover:text-accent-600 dark:hover:text-accent-400">Correcciones</a>
+      <a href="/contacto" class="hover:text-accent-600 dark:hover:text-accent-400">Contacto</a>
+      <a href="/privacidad" class="hover:text-accent-600 dark:hover:text-accent-400">Privacidad</a>
+      <a href="mailto:indie@pruebapublica.com" class="hover:text-accent-600 dark:hover:text-accent-400">indie@pruebapublica.com</a>
+      <a href="/rss.xml" class="hover:text-accent-600 dark:hover:text-accent-400">RSS</a>
+    </div>
+    <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer"
+      class="inline-flex items-center gap-2 rounded-full bg-[#13C3A5] px-5 py-2 text-sm font-bold text-white transition hover:brightness-110">
+      ☕ Invítame a un café
+    </a>
+    <p class="text-xs text-slate-400 dark:text-slate-500">© 2026 indie v{version} · indie.pruebapublica.com</p>
+  </div>
+</footer>

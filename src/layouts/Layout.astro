@@ -1,0 +1,82 @@
+---
+// src/layouts/Layout.astro
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: string;
+  url?: string;
+  wide?: boolean;
+}
+const {
+  title,
+  description = 'Linux, self-hosting, homelab y software hecho a mano.',
+  image = '/og-indie.png',
+  type = 'website',
+  url = 'https://indie.pruebapublica.com/',
+  wide = false,
+} = Astro.props;
+
+const fullTitle = `${title} | indie`;
+const trimmedDesc = description.length > 155 ? description.slice(0, 152) + '…' : description;
+const siteUrl = 'https://indie.pruebapublica.com';
+const fullImage = image.startsWith('http') ? image : siteUrl + image;
+const fullUrl = url.startsWith('http') ? url : siteUrl + url;
+// Páginas internas (admin): no indexar. OJO: robots.txt NO debe bloquear
+// /admin/, o Google no podría rastrear y leer este noindex (seguiría indexada).
+const noindex = url.startsWith('/admin');
+---
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={trimmedDesc} />
+  <meta name="google-site-verification" content="mlyuKtDMOhZ2x2lMrqr-MHT9LeUW8i6uEJw1Sv6AzNY" />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="indie" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="indie" />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={trimmedDesc} />
+  <meta property="og:image" content={fullImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="indie — Linux, self-hosting y software hecho a mano" />
+  <meta property="og:url" content={fullUrl} />
+  <meta property="og:type" content={type} />
+  <meta property="og:locale" content="es_ES" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={trimmedDesc} />
+  <meta name="twitter:image" content={fullImage} />
+  <meta name="twitter:image:alt" content="indie — Linux, self-hosting y software hecho a mano" />
+
+  <link rel="canonical" href={fullUrl} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate" type="application/rss+xml" title="indie — RSS" href="/rss.xml" />
+  <slot name="head" />
+</head>
+<body class="min-h-screen antialiased">
+  <Header />
+  <main class={`mx-auto px-4 py-10 ${wide ? 'max-w-6xl' : 'max-w-4xl'}`}>
+    <slot />
+  </main>
+  <Footer />
+</body>
+</html>

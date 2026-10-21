@@ -1,0 +1,54 @@
+---
+// src/pages/tags/index.astro
+// Índice de todos los tags del blog con recuento de artículos.
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+import { isIndiePost } from "../../lib/indie";
+
+export function tagSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const posts = (await getCollection('posts')).filter(isIndiePost)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+type Entrada = { label: string; slug: string; posts: typeof posts };
+const porTag = new Map<string, Entrada>();
+for (const p of posts) {
+  for (const t of p.data.tags || []) {
+    const slug = tagSlug(t);
+    if (!porTag.has(slug)) porTag.set(slug, { label: t, slug, posts: [] });
+    porTag.get(slug)!.posts.push(p);
+  }
+}
+const temas = [...porTag.values()].sort(
+  (a, b) => b.posts.length - a.posts.length || a.label.localeCompare(b.label, "es")
+);
+const totalPosts = temas.reduce((n, t) => n + t.posts.length, 0);
+---
+<Layout title="Etiquetas · Temas del blog" url="/tags/">
+  <h1 class="font-serif text-4xl font-bold text-slate-900 dark:text-white">Etiquetas</h1>
+  <p class="mt-2 text-slate-600 dark:text-slate-400">
+    {temas.length} etiquetas sobre {posts.length} artículos. Cada etiqueta agrupa los posts que la usan.
+  </p>
+  <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {temas.map((t) => (
+      <a href={`/tags/${t.slug}/`} class="block rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3 hover:border-accent-500 hover:bg-accent-50 dark:hover:bg-accent-950/30 dark:hover:border-accent-700 transition-colors">
+        <span class="font-bold text-slate-900 dark:text-white">{t.label}</span>
+        <span class="ml-2 text-sm text-slate-500 dark:text-slate-400">
+          {t.posts.length} {t.posts.length === 1 ? "artículo" : "artículos"}
+        </span>
+      </a>
+    ))}
+  </div>
+  <p class="mt-8 text-sm text-slate-500 dark:text-slate-400">
+    {totalPosts} asignaciones de etiqueta en total · media de {(
+      totalPosts / Math.max(temas.length, 1)
+    ).toFixed(1)} etiquetas por artículo.
+  </p>
+</Layout>

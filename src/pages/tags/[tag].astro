@@ -1,0 +1,51 @@
+---
+// src/pages/tags/[tag].astro
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// Normaliza un tag a su slug de URL: minúsculas, sin acentos, espacios->guiones.
+// También sirve de inversa: al generar la página el param ya viene normalizado.
+export function tagSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags || []))];
+  return tags.map((tag) => ({ params: { tag: tagSlug(tag) }, props: { slug: tagSlug(tag) } }));
+}
+
+const { slug: tag } = Astro.props;
+const posts = (await getCollection('posts')).filter((p) => !p.data.draft)
+  .filter((p) => (p.data.tags || []).some((t) => tagSlug(t) === tag))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const tagTitulo = tag.replace(/-/g, ' ');
+---
+<Layout title={`#${tagTitulo} · Artículos`} url={`/tags/${tag}/`}>
+  <p class="text-sm text-slate-500">
+    <a href="/" class="hover:text-accent-600">← Volver</a>
+  </p>
+  <h1 class="mt-2 font-serif text-4xl font-bold capitalize text-slate-900 dark:text-white">#{tagTitulo}</h1>
+  <p class="mt-1 text-slate-600 dark:text-slate-400">
+    {posts.length} artículo{posts.length !== 1 ? 's' : ''} con este tag
+  </p>
+  <ul class="mt-6 divide-y divide-slate-200 dark:divide-slate-800">
+    {posts.map((p) => (
+      <li class="py-5">
+        <a href={`/posts/${p.slug}/`} class="group block">
+          <span class="text-sm text-slate-500">{fmt.format(p.data.pubDate)}</span>
+          <h2 class="mt-1 font-serif text-2xl font-bold text-slate-900 group-hover:text-accent-700 dark:text-white dark:group-hover:text-accent-400">
+            {p.data.title}
+          </h2>
+          <p class="mt-1 text-slate-600 dark:text-slate-300">{p.data.description}</p>
+        </a>
+      </li>
+    ))}
+  </ul>
+</Layout>

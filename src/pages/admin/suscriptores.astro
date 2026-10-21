@@ -1,0 +1,48 @@
+---
+// src/pages/admin/suscriptores.astro
+import Layout from '../../layouts/Layout.astro';
+import { countSubscribers } from '../../lib/subscribers';
+export const prerender = false;
+
+const total = countSubscribers();
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+---
+<Layout title="Suscriptores newsletter" url="/admin/suscriptores/">
+  <script>
+    let secret = '';
+    try { secret = localStorage.getItem('admin_secret') || ''; } catch (e) {}
+
+    function setSecret() {
+      const v = prompt('Introduce el secret de administración (ADMIN_SECRET):');
+      if (v) { secret = v.trim(); try { localStorage.setItem('admin_secret', secret); } catch (e) {} }
+    }
+    if (!secret) setSecret();
+
+    async function cargar() {
+      const r = await fetch('/api/admin/subscribers', {
+        headers: { 'x-admin-secret': secret },
+      });
+      if (r.status === 401) { setSecret(); return cargar(); }
+      if (!r.ok) return;
+      const data = await r.json();
+      document.querySelector('#lista').innerHTML = data.suscriptores.map((s) => `
+        <li class="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="font-semibold text-slate-900 dark:text-white">${s.email}</span>
+            <span class="text-xs text-slate-400">${fmt.format(new Date(s.fecha))}</span>
+          </div>
+          <span class="text-xs text-slate-500">ip: ${s.ip || '—'}</span>
+          ${s.confirmado ? '' : '<span class="ml-3 text-xs font-medium text-amber-600">sin confirmar</span>'}
+        </li>
+      `).join('');
+    }
+    cargar();
+  </script>
+
+  <div class="flex items-center justify-between">
+    <h1 class="font-serif text-3xl font-bold text-slate-900 dark:text-white">Suscriptores newsletter</h1>
+    <span class="rounded-full bg-accent-100 px-3 py-1 text-sm font-semibold text-accent-800 dark:bg-accent-900/40 dark:text-accent-200">{total} total</span>
+  </div>
+  <p class="mt-2 text-sm text-slate-500">Emails dados de alta en el formulario de suscripción.</p>
+  <ul id="lista" class="mt-6 space-y-3"></ul>
+</Layout>

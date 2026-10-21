@@ -1,0 +1,100 @@
+---
+// src/components/Sidebar.astro
+import { getCollection } from 'astro:content';
+import { getLikes } from '../lib/db';
+
+const posts = (await getCollection('posts')).filter((p) => !p.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const destacado = posts[0];
+const recientes = posts.slice(0, 5);
+// Temas populares: top 8 por nº de artículos + una lista fija siempre visible
+// (series que queremos destacar aunque tengan pocos posts, p.ej. «fábulas»).
+const tagSlug = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const contadorTags = new Map<string, number>();
+for (const p of posts) for (const t of p.data.tags || []) contadorTags.set(t, (contadorTags.get(t) || 0) + 1);
+const _porUso = [...contadorTags.entries()].sort((a, b) => b[1] - a[1]);
+const FIJOS = ['fábulas'];
+const temas = [
+  ...FIJOS.filter((t) => contadorTags.has(t)).map((t) => [t, contadorTags.get(t)!] as [string, number]),
+  ..._porUso.filter(([t]) => !FIJOS.includes(t)).slice(0, 8),
+];
+// "Lo más leído" por likes (SQLite), top 4
+const masLeidos = posts
+  .map((p) => ({ slug: p.slug, title: p.data.title, likes: getLikes(p.slug) }))
+  .sort((a, b) => b.likes - a.likes)
+  .slice(0, 4);
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<aside class="space-y-8">
+  <!-- Destacado -->
+  {destacado && (
+    <section>
+      <h3 class="mb-3 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:text-slate-400">Destacado</h3>
+      <a href={`/posts/${destacado.slug}/`} class="group block">
+        <span class="text-xs text-slate-400">{fmt.format(destacado.data.pubDate)}</span>
+        <h4 class="mt-1 font-serif text-lg font-bold leading-snug text-slate-900 group-hover:text-accent-600 dark:text-white dark:group-hover:text-accent-400">
+          {destacado.data.title}
+        </h4>
+      </a>
+    </section>
+  )}
+
+  <!-- Lo más leído -->
+  {masLeidos.length > 0 && (
+    <section>
+      <h3 class="mb-3 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:text-slate-400">Lo más leído</h3>
+      <ol class="space-y-2">
+        {masLeidos.map((p, i) => (
+          <li class="flex items-start gap-3">
+            <span class="font-serif text-xl font-bold text-slate-300 dark:text-slate-600">{i + 1}</span>
+            <a href={`/posts/${p.slug}/`} class="text-sm font-medium leading-snug text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">
+              {p.title}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <!-- Recientes -->
+  <section>
+    <h3 class="mb-3 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:text-slate-400">Recientes</h3>
+    <ul class="space-y-2">
+      {recientes.map((p) => (
+        <li>
+          <a href={`/posts/${p.slug}/`} class="text-sm font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">
+            {p.data.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- Temas populares -->
+  <section>
+    <h3 class="mb-3 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:text-slate-400">Temas</h3>
+    <ul class="flex flex-wrap gap-2">
+      {temas.map(([tag, n]) => (
+        <li>
+          <a href={`/tags/${tagSlug(tag)}/`} class="rounded-full bg-slate-100 px-3 py-1 text-xs capitalize text-slate-700 hover:bg-accent-600 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-accent-600 dark:hover:text-white">
+            {tag} · {n}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- El proyecto / ecosistema -->
+  <section>
+    <h3 class="mb-3 border-b border-slate-200 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:border-slate-700 dark:text-slate-400">El proyecto</h3>
+    <ul class="space-y-2 text-sm">
+      <li><a href="https://www.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Prueba Pública — el ecosistema</a></li>
+      <li><a href="https://vivienda.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Vivienda — datos oficiales</a></li>
+      <li><a href="https://municipal.viajeinteligencia.com/mapa-alquiler.html?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Alquiler por municipio — índice VIA</a></li>
+      <li><a href="https://fimi.viajeinteligencia.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Radar FIMI — amplificación</a></li>
+      <li><a href="https://nearme.viajeinteligencia.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">NearMe — radar de datos</a></li>
+      <li><a href="https://fimi.viajeinteligencia.com/consulta.html?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Consulta de enlace — ¿eco o amplificación?</a></li>
+      <li><a href="https://elecciones29n.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Sondeos 29N — media agregada con rango</a></li>
+      <li><a href="https://agenda.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo" class="font-medium text-slate-700 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">Agenda — local-first</a></li>
+    </ul>
+  </section>
+</aside>

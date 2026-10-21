@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+const title = 'Correcciones';
+const description = 'Cómo se corrigen los errores en indie: qué se cambia, cómo se avisa y dónde se registra.';
+---
+<Layout title={title} description={description} url="/correcciones/">
+  <main class="mx-auto max-w-3xl px-4 py-12">
+    <header class="mb-12 border-b border-slate-200 pb-8 dark:border-slate-800">
+      <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Transparencia</p>
+      <h1 class="mt-3 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Correcciones</h1>
+      <p class="mt-5 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+        Si un artículo tiene un error, se corrige. Y se dice.
+      </p>
+    </header>
+
+    <div class="space-y-10">
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Qué se corrige</h2>
+        <p class="mt-3 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+          Errores de hecho, cifras equivocadas, enlaces rotos o una herramienta descrita de forma
+          que induce a error. Los cambios de criterio no se presentan como correcciones: si un
+          artículo se actualiza porque el software cambió, se indica la fecha.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Cómo se avisa</h2>
+        <p class="mt-3 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+          Para un error que cambia el sentido de lo publicado, se añade una nota al principio del
+          artículo con la fecha. Para erratas menores (una tilde, un enlace), se corrige en el sitio
+          sin nota.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Cómo avisar de un error</h2>
+        <p class="mt-3 text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+          Escribe a
+          <a href="mailto:indie@pruebapublica.com" class="font-medium text-accent-700 underline underline-offset-4 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300">
+            indie@pruebapublica.com
+          </a>
+          con el enlace y lo que no cuadra. Si tienes la fuente correcta, mejor.
+        </p>
+      </section>
+    </div>
+
+    <footer class="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/40">
+      <p class="text-base leading-relaxed text-slate-600 dark:text-slate-400">
+        Esta página se actualizará cuando haya correcciones que registrar.
+      </p>
+    </footer>
+  </main>
+</Layout>

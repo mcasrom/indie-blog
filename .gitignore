@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.astro/
+.env
+data/
+*.db
+*.db-shm
+*.db-wal
+logs/
+scripts/newsletter_preview.html
+scripts/newsletter_alert_preview.html
+__pycache__/
+*.pyc
+.DS_Store
+# material heredado del blog de análisis, fuera del repo
+_posts_analisis/
+_public_analisis/
+borradores/
+*.bak
+*.bak-*
+web_tmp/
+web_prev/

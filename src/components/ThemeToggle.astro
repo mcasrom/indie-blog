@@ -1,0 +1,70 @@
+---
+// src/components/ThemeToggle.astro
+---
+<button id="theme-toggle" class="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-xs transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700" title="Cambiar tema">
+  <span id="theme-icon-light" class="hidden">☀️</span>
+  <span id="theme-icon-sepia" class="hidden">📜</span>
+  <span id="theme-icon-dark" class="hidden">🌙</span>
+</button>
+
+<script>
+  const themes = ['light', 'sepia', 'dark'] as const;
+  type Theme = typeof themes[number];
+
+  const icons: Record<Theme, string> = {
+    light: '☀️',
+    sepia: '📜',
+    dark: '🌙'
+  };
+
+  function getSystemTheme(): Theme {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
+  }
+
+  function getStoredTheme(): Theme | null {
+    const stored = localStorage.getItem('theme');
+    if (stored && themes.includes(stored as Theme)) return stored as Theme;
+    return null;
+  }
+
+  function applyTheme(theme: Theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.remove('light', 'sepia', 'dark');
+    document.documentElement.classList.add(theme);
+
+    // Update icons
+    Object.entries(icons).forEach(([key, icon]) => {
+      const el = document.getElementById(`theme-icon-${key}`);
+      if (el) el.textContent = icon;
+    });
+
+    // Show current icon, hide others
+    themes.forEach(t => {
+      const el = document.getElementById(`theme-icon-${t}`);
+      if (el) el.style.display = t === theme ? 'inline' : 'none';
+    });
+
+    localStorage.setItem('theme', theme);
+  }
+
+  // Initialize
+  const stored = getStoredTheme();
+  const initial = stored || getSystemTheme();
+  applyTheme(initial);
+
+  // Toggle on click
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') as Theme || 'light';
+    const idx = themes.indexOf(current);
+    const next = themes[(idx + 1) % themes.length];
+    applyTheme(next);
+  });
+
+  // Listen for system changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!getStoredTheme()) {
+      applyTheme(getSystemTheme());
+    }
+  });
+</script>

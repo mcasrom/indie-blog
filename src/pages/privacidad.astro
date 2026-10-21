@@ -1,0 +1,71 @@
+---
+// src/pages/privacidad.astro
+import Layout from '../layouts/Layout.astro';
+---
+<Layout
+  title="Privacidad y datos"
+  description="Información de privacidad del blog indie (pruebapublica.com): qué datos trata, para qué, cuánto los conserva y cómo ejercer tus derechos (RGPD)."
+  url="/privacidad/"
+>
+  <h1 class="font-serif text-4xl font-bold text-slate-900 dark:text-white">Privacidad y datos</h1>
+  <div class="prose-editorial mt-6">
+    <p>
+      Este blog publica artículos sobre Linux y software indie y ofrece una <strong>newsletter</strong> y un
+      espacio de <strong>comentarios</strong>. Aquí explico, en claro y según el RGPD, qué datos
+      trato, para qué, cuánto los conservo y cómo ejercer tus derechos.
+    </p>
+
+    <h2>1. Responsable y contacto</h2>
+    <p>
+      Blog <strong>indie</strong> (ecosistema pruebapublica.com). Para cualquier cuestión de
+      privacidad: <a href="mailto:analisis@pruebapublica.com">analisis@pruebapublica.com</a>.
+    </p>
+
+    <h2>2. Qué datos trato</h2>
+    <ul>
+      <li><strong>Suscripción a la newsletter</strong>: tu email, con alta explícita (<strong>doble opt-in</strong>).</li>
+      <li><strong>Comentarios</strong>: el nombre y, si lo facilitas, el email y el texto del comentario.</li>
+      <li><strong>Accesos</strong>: la IP en los registros del servidor, para seguridad y antiabuso (rate-limit).</li>
+    </ul>
+    <p>No uso cookies de terceros ni rastreo publicitario. No trato datos de categorías especiales.</p>
+
+    <h2>3. Finalidad y base jurídica</h2>
+    <ul>
+      <li><strong>Newsletter</strong>: enviarte el resumen y los artículos. Base: tu <strong>consentimiento</strong> (art. 6.1.a RGPD), revocable con un clic en cada envío.</li>
+      <li><strong>Comentarios</strong>: publicar y moderar tu comentario. Base: consentimiento al publicarlo.</li>
+      <li><strong>Accesos</strong>: seguridad del servicio. Base: <strong>interés legítimo</strong> (art. 6.1.f RGPD).</li>
+    </ul>
+
+    <h2>4. Cuánto tiempo los conservo</h2>
+    <table class="w-full text-sm my-3">
+      <thead><tr><th class="text-left">Dato</th><th class="text-left">Retención</th></tr></thead>
+      <tbody>
+        <tr><td>Suscripción</td><td>hasta la baja</td></tr>
+        <tr><td>Comentarios</td><td>hasta su retirada o supresión a petición</td></tr>
+        <tr><td>Registros de acceso (IP)</td><td><strong>14 días</strong> (rotación automática del log)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Destinatarios</h2>
+    <p>
+      No vendo ni cedo datos. Uso tres encargados: <strong>Hetzner</strong> (alojamiento, UE),
+      <strong>Cloudflare</strong> (CDN) y <strong>Resend</strong> (envío de la newsletter) — estos
+      dos últimos con posible acceso desde EE. UU., solo para servir la web y enviar el correo.
+    </p>
+
+    <h2>6. Tus derechos</h2>
+    <p>
+      Puedes ejercer <strong>acceso, rectificación, supresión, oposición, limitación y
+      portabilidad</strong> escribiendo a
+      <a href="mailto:analisis@pruebapublica.com">analisis@pruebapublica.com</a>. También puedes
+      reclamar ante la <strong>AEPD</strong>.
+    </p>
+
+    <h2>7. Seguridad</h2>
+    <p>HTTPS + HSTS y cabeceras de seguridad; acceso SSH por clave; rate-limit y backups rotados.</p>
+
+    <p class="text-sm text-slate-500 dark:text-slate-400 mt-8">
+      Última actualización: 30-sep-2026.
+    </p>
+  </div>
+</Layout>

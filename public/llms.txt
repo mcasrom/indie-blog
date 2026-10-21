@@ -1,0 +1,30 @@
+# indie — Linux, self-hosting y software hecho a mano
+
+> Blog en español sobre herramientas que resuelven problemas sin ruido: software pequeño,
+> hecho con intención, que puedes entender, probar y modificar.
+
+## De qué trata
+Linux como punto de partida y, desde ahí, todo el mundo indie: escritorio, terminal y CLI,
+automatización, self-hosting y homelab, y software hecho a mano que merece la pena probar.
+
+## Cómo se escribe
+Práctico, honesto y directo. Si algo no funciona, se dice. Si merece la pena, se explica con
+ejemplos reales y probados. Sin clickbait ni listas infladas.
+
+## Autoría
+Una persona, desde la práctica diaria con Linux. Autor: M. Castillo.
+
+## Enlaces
+- Inicio: https://indie.pruebapublica.com/
+- Archivo: https://indie.pruebapublica.com/archivo/
+- Etiquetas: https://indie.pruebapublica.com/tags/
+- Empieza aquí: https://indie.pruebapublica.com/empieza-aqui/
+- Sobre el proyecto: https://indie.pruebapublica.com/sobre/
+- RSS: https://indie.pruebapublica.com/rss.xml
+- Sitemap: https://indie.pruebapublica.com/sitemap-index.xml
+
+## Contacto
+indie@pruebapublica.com
+
+## Licencia
+Contenido editorial propio. Cita la fuente y enlaza el artículo original.

@@ -1,0 +1,180 @@
+---
+// src/pages/buscar.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Buscar"
+  description="Busca entre todos los artículos publicados: por título, etiqueta o cualquier palabra del texto."
+  url="/buscar/"
+>
+  <section class="mx-auto max-w-3xl py-6">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">Archivo</p>
+    <h1 class="mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Buscar en el archivo</h1>
+    <p class="mt-3 text-slate-600 dark:text-slate-300">
+      Por título, tema, etiqueta o cualquier palabra del texto. Se busca en los artículos ya publicados.
+    </p>
+
+    <div class="mt-6">
+      <label for="q" class="sr-only">Buscar</label>
+      <input
+        id="q"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="p. ej. Ceuta, inteligencia artificial, gas, Marruecos…"
+        class="w-full rounded-full border border-slate-300 bg-white px-5 py-3 text-base text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-accent-600 focus:ring-2 focus:ring-accent-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-accent-900"
+      />
+    </div>
+
+    <p id="search-status" class="mt-4 text-sm text-slate-500 dark:text-slate-400" aria-live="polite"></p>
+    <ul id="search-results" class="mt-4 divide-y divide-slate-200 dark:divide-slate-800"></ul>
+  </section>
+
+  <script>
+    const input = document.getElementById('q') as HTMLInputElement | null;
+    const statusEl = document.getElementById('search-status');
+    const resultsEl = document.getElementById('search-results');
+    const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    type Post = {
+      slug: string;
+      title: string;
+      description: string;
+      tags: string[];
+      categoria: string;
+      date: string;
+      url: string;
+      body: string;
+    };
+
+    let cache: Post[] | null = null;
+    let fetchPromise: Promise<Post[]> | null = null;
+
+    function cargar(): Promise<Post[]> {
+      if (cache) return Promise.resolve(cache);
+      if (!fetchPromise) {
+        fetchPromise = fetch('/buscar.json')
+          .then((r) => r.json())
+          .then((data: Post[]) => (cache = data))
+          .catch(() => (cache = []));
+      }
+      return fetchPromise;
+    }
+
+    const norm = (s: string) =>
+      (s || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const esc = (s: string) =>
+      (s || '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
+      );
+
+    function resaltar(texto: string, terms: string[]): string {
+      let out = esc(texto);
+      for (const t of terms) {
+        if (t.length < 2) continue;
+        const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        out = out.replace(
+          re,
+          '<mark class="rounded bg-accent-100 px-0.5 text-accent-800 dark:bg-accent-900 dark:text-accent-100">$1</mark>'
+        );
+      }
+      return out;
+    }
+
+    function tarjeta(p: Post, terms: string[]): string {
+      const fecha = fmt.format(new Date(p.date + 'T00:00:00'));
+      const tags = (p.tags || [])
+        .slice(0, 6)
+        .map(
+          (t) =>
+            `<span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">#${esc(t)}</span>`
+        )
+        .join(' ');
+      return `<li class="py-6">
+        <a href="${p.url}" class="group block">
+          <span class="text-sm text-slate-500 dark:text-slate-400">${fecha} · ${esc(p.categoria)}</span>
+          <h2 class="mt-1 font-serif text-2xl font-bold leading-snug text-slate-900 transition group-hover:text-accent-700 dark:text-white dark:group-hover:text-accent-400">
+            ${resaltar(p.title, terms)}
+          </h2>
+          <p class="mt-1 text-slate-600 dark:text-slate-300">${resaltar(p.description, terms)}</p>
+          ${tags ? `<div class="mt-2 flex flex-wrap gap-2">${tags}</div>` : ''}
+          <span class="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-accent-600 dark:text-accent-400">
+            Leer artículo <span class="transition group-hover:translate-x-1">→</span>
+          </span>
+        </a>
+      </li>`;
+    }
+
+    function pintar(lista: Post[], terms: string[]) {
+      if (!resultsEl || !statusEl) return;
+      if (lista.length === 0) {
+        statusEl.textContent = terms.length
+          ? `Sin resultados para «${terms.join(' ')}». Prueba con otra palabra.`
+          : 'No hay artículos publicados.';
+        resultsEl.innerHTML = '';
+        return;
+      }
+      statusEl.textContent = terms.length
+        ? `${lista.length} ${lista.length === 1 ? 'resultado' : 'resultados'} para «${terms.join(' ')}»`
+        : `${lista.length} artículos en el archivo`;
+      resultsEl.innerHTML = lista.map((p) => tarjeta(p, terms)).join('');
+    }
+
+    function buscar(q: string) {
+      const terms = norm(q).split(/\s+/).filter((t) => t.length >= 2);
+      cargar().then((posts) => {
+        if (terms.length === 0) {
+          pintar(posts, []);
+          return;
+        }
+        const res: { p: Post; score: number }[] = [];
+        for (const p of posts) {
+          const tTitle = norm(p.title);
+          const tTags = norm((p.tags || []).join(' '));
+          const tDesc = norm(p.description);
+          const tBody = norm(p.body);
+          let score = 0;
+          let todos = true;
+          for (const term of terms) {
+            let s = 0;
+            if (tTitle.includes(term)) s += 10;
+            if (tTags.includes(term)) s += 6;
+            if (tDesc.includes(term)) s += 3;
+            if (tBody.includes(term)) s += 1;
+            if (s === 0) {
+              todos = false;
+              break;
+            }
+            score += s;
+          }
+          if (todos) res.push({ p, score });
+        }
+        res.sort((a, b) => b.score - a.score || (a.p.date < b.p.date ? 1 : -1));
+        // Para resaltar usamos los términos tal cual los escribió el usuario.
+        pintar(res.map((r) => r.p), q.trim().split(/\s+/).filter(Boolean));
+      });
+    }
+
+    let t: ReturnType<typeof setTimeout> | undefined;
+    function alEscribir() {
+      const q = input ? input.value : '';
+      const url = q.trim() ? `/buscar?q=${encodeURIComponent(q.trim())}` : '/buscar';
+      history.replaceState(null, '', url);
+      clearTimeout(t);
+      t = setTimeout(() => buscar(q), 120);
+    }
+
+    if (input) {
+      const inicial = new URLSearchParams(location.search).get('q') || '';
+      input.value = inicial;
+      input.addEventListener('input', alEscribir);
+      buscar(inicial);
+    }
+  </script>
+</Layout>

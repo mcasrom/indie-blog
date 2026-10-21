@@ -1,0 +1,82 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const inicio = posts[0];
+---
+
+<Layout
+  title="Empieza aquí"
+  description="Por dónde empezar si te interesan Linux, el self-hosting y el software indie: qué significa 'indie', qué montar primero y cómo seguir."
+  url="/empieza-aqui/"
+>
+  <article class="mx-auto max-w-3xl py-10">
+    <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">
+      Empieza aquí
+    </p>
+    <h1 class="mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+      Por dónde empezar
+    </h1>
+    <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+      Este blog trata de tres cosas que van juntas: <strong>Linux</strong> como sistema,
+      <strong>self-hosting</strong> como forma de recuperar el control de tus datos y
+      <strong>software indie</strong> como criterio para elegir herramientas pequeñas,
+      mantenidas y comprensibles.
+    </p>
+
+    <div class="mt-10 space-y-6">
+      <section class="rounded-2xl border border-slate-200 p-6 dark:border-slate-700">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">1. Qué significa «indie»</h2>
+        <p class="mt-2 text-slate-600 dark:text-slate-300">
+          No es una marca ni una moda: es una forma de entender el software. Proyectos
+          pequeños, con una razón clara para existir, que puedes leer, ejecutar y mantener
+          sin depender de una gran plataforma.
+        </p>
+        {inicio && (
+          <a href={`/posts/${inicio.slug}/`} class="mt-4 inline-flex font-medium text-accent-600 hover:underline dark:text-accent-400">
+            Leer: {inicio.data.title} →
+          </a>
+        )}
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 p-6 dark:border-slate-700">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">2. Linux sin ruido</h2>
+        <p class="mt-2 text-slate-600 dark:text-slate-300">
+          Debian estable como base, un servidor pequeño y servicios que se entienden leyendo
+          su configuración. Sin capas innecesarias y sin cambiar de distribución cada mes.
+        </p>
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+          Etiquetas relacionadas:
+          <a href="/tags/linux/" class="ml-1 hover:text-accent-600 dark:hover:text-accent-400">linux</a>,
+          <a href="/tags/software-libre/" class="hover:text-accent-600 dark:hover:text-accent-400">software libre</a>,
+          <a href="/tags/filosofia/" class="hover:text-accent-600 dark:hover:text-accent-400">filosofía</a>.
+        </p>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 p-6 dark:border-slate-700">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">3. Self-hosting y homelab</h2>
+        <p class="mt-2 text-slate-600 dark:text-slate-300">
+          Montar lo que necesitas en tu propia máquina: copias de seguridad, DNS, notas,
+          un proxy inverso. La meta no es tener más servicios, sino depender de menos.
+        </p>
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+          Etiquetas relacionadas:
+          <a href="/tags/self-hosting/" class="ml-1 hover:text-accent-600 dark:hover:text-accent-400">self-hosting</a>,
+          <a href="/tags/homelab/" class="hover:text-accent-600 dark:hover:text-accent-400">homelab</a>,
+          <a href="/tags/indie/" class="hover:text-accent-600 dark:hover:text-accent-400">indie</a>.
+        </p>
+      </section>
+    </div>
+
+    <p class="mt-10 text-sm text-slate-500 dark:text-slate-400">
+      Puedes seguir por el <a href="/archivo/" class="hover:text-accent-600 dark:hover:text-accent-400">archivo</a>,
+      el <a href="/tags/" class="hover:text-accent-600 dark:hover:text-accent-400">índice de etiquetas</a>
+      o el <a href="/buscar/" class="hover:text-accent-600 dark:hover:text-accent-400">buscador</a>.
+      Si quieres avisos de lo nuevo, <a href="/suscribirse/" class="font-medium text-accent-700 hover:underline dark:text-accent-400">suscríbete</a>.
+    </p>
+  </article>
+</Layout>

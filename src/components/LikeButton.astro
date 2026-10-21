@@ -1,0 +1,59 @@
+---
+// src/components/LikeButton.astro
+interface Props {
+  slug: string;
+  initialCount: number;
+}
+const { slug, initialCount } = Astro.props;
+---
+<div class="flex items-center gap-2" data-like data-slug={slug}>
+  <button data-like-btn
+    class="group inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-accent-600 hover:text-accent-700 active:scale-95 dark:border-slate-700 dark:text-slate-300 dark:hover:border-accent-400 dark:hover:text-accent-400"
+    aria-label="Me gusta">
+    <span data-like-icon class="text-base transition group-active:scale-125">♡</span>
+    <span data-like-count>{initialCount}</span>
+  </button>
+  <span class="text-xs text-slate-400">me gusta</span>
+</div>
+
+<script>
+  const root = document.querySelector('[data-like]') as HTMLElement | null;
+  if (root) {
+    const slug = root.dataset.slug || '';
+    const btn = root.querySelector('[data-like-btn]') as HTMLButtonElement;
+    const icon = root.querySelector('[data-like-icon]') as HTMLElement;
+    const count = root.querySelector('[data-like-count]') as HTMLElement;
+    const liked = new Set<string>(JSON.parse(localStorage.getItem('liked') || '[]'));
+
+    function updateVisual() {
+      if (liked.has(slug)) { icon.textContent = '♥'; icon.classList.add('text-accent-600'); }
+    }
+    updateVisual();
+
+    async function refreshCount() {
+      try {
+        const r = await fetch(`/api/like/${encodeURIComponent(slug)}`);
+        if (!r.ok) return;
+        const data = await r.json();
+        count.textContent = String(data.count);
+      } catch { /* sin red: mantener valor inicial */ }
+    }
+    refreshCount();
+
+    btn?.addEventListener('click', async () => {
+      if (liked.has(slug)) return;
+      try {
+        const r = await fetch(`/api/like/${encodeURIComponent(slug)}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        count.textContent = String(data.count);
+        liked.add(slug);
+        localStorage.setItem('liked', JSON.stringify([...liked]));
+        updateVisual();
+      } catch { /* sin red */ }
+    });
+  }
+</script>

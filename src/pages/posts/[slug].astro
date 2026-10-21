@@ -1,0 +1,411 @@
+---
+// src/pages/posts/[slug].astro
+import Layout from '../../layouts/Layout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import LikeButton from '../../components/LikeButton.astro';
+import CommentForm from '../../components/CommentForm.astro';
+import CommentList from '../../components/CommentList.astro';
+import NewsletterForm from '../../components/NewsletterForm.astro';
+import { getCollection } from 'astro:content';
+import { getLikes } from '../../lib/db';
+import { readingTimeLabel } from '../../lib/readingTime';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const lectura = post.body ? readingTimeLabel(post.body) : '';
+const todos = (await getCollection('posts')).filter((p) => !p.data.draft).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const idx = todos.findIndex((p) => p.slug === post.slug);
+const siguiente = idx > 0 ? todos[idx - 1] : null;
+
+// Relacionado: el post (distinto) con más tags en común; empate -> más reciente.
+const tagsActuales = new Set(post.data.tags.map((t) => t.toLowerCase()));
+const relacionados = todos
+  .filter((p) => p.slug !== post.slug)
+  .map((p) => ({
+    p,
+    comunes: p.data.tags.filter((t) => tagsActuales.has(t.toLowerCase())).length,
+  }))
+  .filter((x) => x.comunes > 0 && x.p.slug !== (siguiente && siguiente.slug))
+  .sort((a, b) => b.comunes - a.comunes || b.p.data.pubDate.valueOf() - a.p.data.pubDate.valueOf());
+const relacionado = relacionados.length ? relacionados[0].p : null;
+// "Sigue leyendo": hasta 4 (el siguiente por fecha + los más relacionados por tags).
+const seguirLeyendo: typeof todos = [];
+if (siguiente) seguirLeyendo.push(siguiente);
+for (const { p } of relacionados) {
+  if (seguirLeyendo.length >= 4) break;
+  if (!seguirLeyendo.some((x) => x.slug === p.slug)) seguirLeyendo.push(p);
+}
+const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const likes = getLikes(post.slug);
+const postUrl = `https://indie.pruebapublica.com/posts/${post.slug}/`;
+
+// CTA cruzado blog → Radar FIMI: mapeo post → tema del radar (deep-link #tema)
+const fimiTemas = {
+  frontera_sur: { nombre: 'Frontera Sur (España-Marruecos)', desc: 'coordinación y narrativas en la frontera sur' },
+  espana_elecciones: { nombre: 'España — elecciones generales (29-N)', desc: 'coordinación y amplificación en el proceso electoral' },
+  defensa_espana: { nombre: 'España — defensa y amenazas híbridas', desc: 'defensa, amenazas híbridas y disuasión' },
+  eeuu_politica: { nombre: 'Política y desinformación EEUU', desc: 'interferencia electoral y desinformación en EEUU' },
+  oriente_medio: { nombre: 'Oriente Medio (Israel-Irán-Gaza)', desc: 'manipulación informativa en conflicto' },
+  elecciones: { nombre: 'Elecciones e interferencia electoral', desc: 'coordinación y amplificación en procesos electorales' },
+  energia: { nombre: 'Energía (petróleo/gas/precios)', desc: 'narrativas energéticas y de suministro' },
+  sahel: { nombre: 'Sahel (África Occidental)', desc: 'desinformación en el Sahel' },
+  inteligencia_artificial: { nombre: 'Inteligencia artificial', desc: 'narrativas y amplificación sobre IA' },
+};
+const fimiPostMap = {
+  'ceuta-melilla-2026-crisis-migratoria-arma-diplomatica': 'frontera_sur',
+  'puente-ceuta-2026-frase-triunfalismo': 'frontera_sur',
+  'geopolitica-migraciones-2026': 'frontera_sur',
+  'geopolitica-fronteras-2026': 'frontera_sur',
+  'lo-que-amplifico-la-crisis-de-ceuta': 'frontera_sur',
+  'dereliction-of-duty-lealtad-bunkeriza-moncloa': 'espana_elecciones',
+  'dereliction-of-duty-ii-lo-que-la-constitucion-exigia': 'espana_elecciones',
+  'dereliction-of-duty-iv-el-control-parlamentario': 'espana_elecciones',
+  'espana-elecciones-29n-primera-lectura': 'espana_elecciones',
+  'elecciones-generales-2026-radar-fimi': 'espana_elecciones',
+  'donroe-la-nueva-version-de-la-doctrina-monroe': 'eeuu_politica',
+  'neocolonialismo-siglo-xxi-corolario-trump-monroe': 'eeuu_politica',
+  'geopolitica-aranceles-2026': 'eeuu_politica',
+  'quien-paga-el-arancel-2026': 'eeuu_politica',
+  'expansionismo-trumpista-mapas-destino-manifiesto': 'eeuu_politica',
+  'el-mapa-de-intereses': 'frontera_sur',
+  'el-tablero-antes-de-la-tormenta': 'frontera_sur',
+  'espana-gasto-defensa-1977-2025-salto-estrategico': 'defensa_espana',
+  'ceuta-fimi-y-la-frontera-informativa': 'frontera_sur',
+  'migracion-guerra-hibrida': 'frontera_sur',
+  'que-detecta-hoy-el-observatorio-fimi': 'elecciones',
+  'fimi-radar-que-vigila': 'elecciones',
+  'el-zorro-que-queria-que-el-bosque-le-tuviera-miedo': 'defensa_espana',
+  'geopolitica-petroleo-2026': 'energia',
+  'geopolitica-oleoductos-2026': 'energia',
+  'geopolitica-datoesfera-2026': 'eeuu_politica',
+  'doctrinas-101-corolario-trump-monroe': 'eeuu_politica',
+  'doctrinas-101-comunidad-destino-china': 'eeuu_politica',
+  'doctrinas-101-autonomia-estrategica': 'defensa_espana',
+  'doctrinas-101-extranjero-cercano': 'defensa_espana',
+};
+const fimiTema = fimiPostMap[post.slug] ? fimiTemas[fimiPostMap[post.slug]] : null;
+// Cross-promo a Vivienda (serie «Vivienda y poder»): datos oficiales del microservicio.
+const esVivienda = post.data.serie === 'Vivienda y poder';
+
+// Serie: posts hermanos por campo `serie` del frontmatter (orden por `serie_numero`).
+const serieNombre = post.data.serie ?? null;
+const serieDesc: Record<string, string> = {
+  'Ceuta 2026': 'Serie de análisis sobre la crisis migratoria como arma diplomática',
+  'Dereliction of Duty': 'Serie sobre la lealtad política y el debilitamiento institucional en España',
+  'Fábulas del análisis': 'Siete fábulas para pensar el método del análisis',
+};
+const seriePosts = serieNombre
+  ? todos
+      .filter((p) => p.data.serie === serieNombre)
+      .sort(
+        (a, b) =>
+          (a.data.serie_numero ?? 999) - (b.data.serie_numero ?? 999) ||
+          a.data.pubDate.valueOf() - b.data.pubDate.valueOf()
+      )
+  : [];
+const serieIdx = seriePosts.findIndex((p) => p.slug === post.slug);
+const SERIE_MAX = 6;
+const serieEje: Record<string, string> = {
+  'Geopolítica 101': 'geopolitica-101',
+  'Fábulas del análisis': 'fabulas',
+  'Ceuta 2026': 'fronteras-y-migraciones',
+  'Dereliction of Duty': 'fronteras-y-migraciones',
+};
+const serieVisibles = seriePosts.slice(0, SERIE_MAX);
+const serieResto = seriePosts.length - serieVisibles.length;
+
+// Compartir: X cuenta el enlace como 23 chars (t.co).
+// UTM para poder atribuir de qué canal viene cada lectura (hoy el 66 % llega sin referrer).
+const withUtm = (src: string) => `${postUrl}?utm_source=${src}&utm_medium=social`;
+const maxTitleLen = 140 - 23 - 3; // 114 (3 = comillas + espacio)
+const shareTitle = post.data.title.length > maxTitleLen
+  ? post.data.title.slice(0, maxTitleLen - 1) + '…'
+  : post.data.title;
+const shareBody = (src: string) => encodeURIComponent(`"${shareTitle}" ${withUtm(src)}`);
+const shareX = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${shareTitle}"`)}&url=${encodeURIComponent(withUtm('x'))}`;
+const shareBsky = `https://bsky.app/intent/compose?text=${shareBody('bluesky')}`;
+const shareMasto = `https://mastodon.social/share?text=${shareBody('mastodon')}`;
+const shareHN = `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(withUtm('hn'))}`;
+const shareLi = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(withUtm('linkedin'))}`;
+const waShare = `https://wa.me/?text=${encodeURIComponent(`${post.data.title} — ${withUtm('whatsapp')}`)}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.pubDate.toISOString(),
+  image: post.data.image ? `https://indie.pruebapublica.com${post.data.image}` : 'https://indie.pruebapublica.com/og-indie.png',
+  author: { '@type': 'Person', name: 'M. Castillo', url: 'https://indie.pruebapublica.com' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'indie',
+    url: 'https://indie.pruebapublica.com',
+    logo: { '@type': 'ImageObject', url: 'https://indie.pruebapublica.com/og-indie.png' },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  keywords: post.data.tags.join(', '),
+  wordCount: post.body ? post.body.split(/\s+/).length : undefined,
+  timeRequired: lectura || undefined,
+};
+
+// BreadcrumbList: Inicio → (etiqueta principal) → Post.
+const tagSlug = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const primeraTag = post.data.tags[0];
+const breadcrumbItems: Array<Record<string, unknown>> = [
+  { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://indie.pruebapublica.com/' },
+];
+if (primeraTag) {
+  breadcrumbItems.push({ '@type': 'ListItem', position: 2, name: primeraTag, item: `https://indie.pruebapublica.com/tags/${tagSlug(primeraTag)}/` });
+}
+breadcrumbItems.push({ '@type': 'ListItem', position: breadcrumbItems.length + 1, name: post.data.title, item: postUrl });
+const breadcrumbLd = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: breadcrumbItems };
+
+// FAQPage (solo si el post declara `faq` en el frontmatter; el contenido es visible).
+const faq = post.data.faq || [];
+const faqLd = faq.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
+---
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.image}
+  type="article"
+  url={postUrl}
+  wide
+>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} slot="head" />
+  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} slot="head" />}
+  <a href="/" class="text-sm text-slate-500 hover:text-accent-600 dark:hover:text-accent-400">← Volver</a>
+
+  <div class="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
+    <article>
+      <header>
+        <div class="flex items-center gap-3 text-sm text-slate-500">
+          <time datetime={post.data.pubDate.toISOString()}>{fmt.format(post.data.pubDate)}</time>
+          <span>·</span>
+          <span class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-3.5 w-3.5" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span class="font-medium text-slate-700 dark:text-slate-200">M. Castillo</span>
+          </span>
+          <span>·</span>
+          <span>{post.data.categoria}</span>
+          {lectura && (
+            <>
+              <span>·</span>
+              <span role="note">⏱ {lectura}</span>
+            </>
+          )}
+        </div>
+        {seriePosts.length > 1 && serieIdx >= 0 && (
+          <p class="mt-3 text-sm font-semibold uppercase tracking-widest text-accent-700 dark:text-accent-300">
+            {serieNombre} · {serieIdx + 1}/{seriePosts.length}
+          </p>
+        )}
+        <h1 class="mt-3 font-serif text-4xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
+          {post.data.title}
+        </h1>
+        {post.data.tags.length > 0 && (
+          <div class="mt-3 flex flex-wrap gap-2">
+            {post.data.tags.map((tag) => (
+              <a href={`/tags/${tag.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}
+                 class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 transition hover:bg-accent-600 hover:text-white dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-accent-400">#{tag}</a>
+            ))}
+          </div>
+        )}
+        <div class="mt-6">
+          <LikeButton slug={post.slug} initialCount={likes} />
+        </div>
+      </header>
+
+      {post.data.resumen && post.data.resumen.length > 0 && (
+        <div class="mt-6 rounded-2xl border border-accent-200 bg-accent-50/40 p-5 dark:border-accent-800 dark:bg-accent-950/20">
+          <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-700 dark:text-accent-300">Lo esencial</p>
+          <ul class="list-disc space-y-1 pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+            {post.data.resumen.map((r) => <li>{r}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {post.data.abstract_en && (
+        <div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/40">
+          <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">In English</p>
+          <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{post.data.abstract_en}</p>
+        </div>
+      )}
+
+      <div class="prose-editorial mt-8">
+        <Content />
+      </div>
+
+      <div class="mt-10 rounded-2xl border border-accent-300 bg-accent-50/50 p-6 dark:border-accent-700 dark:bg-accent-950/30">
+        <NewsletterForm variante="inline" />
+      </div>
+
+      <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800">
+        <div class="flex flex-wrap items-center gap-2">
+          <a href={waShare} target="_blank" rel="noopener noreferrer"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-green-500 hover:text-green-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-green-400 dark:hover:text-green-400">
+            📲 WhatsApp
+          </a>
+          <a href={shareX} target="_blank" rel="noopener noreferrer"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-black hover:text-black dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-300 dark:hover:text-white">
+            ✕ X
+          </a>
+          <a href={shareBsky} target="_blank" rel="noopener noreferrer"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-sky-500 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400">
+            🦋 Bluesky
+          </a>
+          <a href={shareMasto} target="_blank" rel="noopener noreferrer"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-indigo-500 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-indigo-400 dark:hover:text-indigo-400">
+            🐘 Mastodon
+          </a>
+          <a href={shareHN} target="_blank" rel="noopener noreferrer" title="Enviar a Hacker News (escribe el título en inglés)"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-orange-600 hover:text-orange-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-orange-400 dark:hover:text-orange-400">
+            🟠 HN
+          </a>
+          <a href={shareLi} target="_blank" rel="noopener noreferrer" title="Compartir en LinkedIn"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-sky-700 hover:text-sky-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-400">
+            in LinkedIn
+          </a>
+          <a href="/rss.xml" title="Suscríbete por RSS"
+            class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-orange-500 hover:text-orange-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-orange-400 dark:hover:text-orange-400">
+            📡 RSS
+          </a>
+        </div>
+        <a href="https://ko-fi.com/m_castillo" target="_blank" rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-full bg-[#13C3A5] px-5 py-2 text-sm font-bold text-white transition hover:brightness-110">
+          ☕ Invítame a un café
+        </a>
+      </div>
+
+      {seriePosts.length > 1 && serieIdx >= 0 && (
+        <div class="mt-10 rounded-2xl border border-dashed border-accent-300 bg-accent-50/50 p-6 dark:border-accent-700 dark:bg-accent-950/30">
+          <h3 class="text-sm font-semibold uppercase tracking-widest text-accent-700 dark:text-accent-300">
+            {serieNombre} · Parte {serieIdx + 1} de {seriePosts.length}
+          </h3>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {serieDesc[serieNombre] ?? `Serie: ${serieNombre}`}
+          </p>
+          <ul class="mt-3 space-y-1.5">
+            {serieVisibles.map((p, i) => (
+              <li>
+                {p.slug === post.slug ? (
+                  <span class="text-sm font-semibold text-accent-700 dark:text-accent-300">{i + 1}. {p.data.title} ←</span>
+                ) : (
+                  <a href={`/posts/${p.slug}/`} class="text-sm text-slate-600 hover:text-accent-600 dark:text-slate-300 dark:hover:text-accent-400">
+                    {i + 1}. {p.data.title}
+                  </a>
+                )}
+              </li>
+            ))}
+            {serieResto > 0 && serieEje[serieNombre] && (
+              <li>
+                <a href={`/temas/${serieEje[serieNombre]}/`} class="text-sm font-medium text-accent-700 hover:underline dark:text-accent-400">
+                  y {serieResto} parte{serieResto === 1 ? '' : 's'} más →
+                </a>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      {fimiTema && (
+        <div class="mt-10 rounded-2xl border border-accent-300 bg-accent-50/50 p-6 dark:border-accent-700 dark:bg-accent-950/30">
+          <h3 class="text-sm font-semibold uppercase tracking-widest text-accent-700 dark:text-accent-300">
+            📡 Este tema, en vivo: Radar FIMI
+          </h3>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{fimiTema.desc}</p>
+          <a
+            href={`https://fimi.viajeinteligencia.com/?utm_source=analisis&utm_medium=crosspromo#${fimiPostMap[post.slug]}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-3 inline-flex items-center gap-2 rounded-full bg-accent-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-accent-700 dark:bg-accent-400 dark:hover:bg-accent-500"
+          >
+            Abrir {fimiTema.nombre} en el radar →
+          </a>
+        </div>
+      )}
+
+      {esVivienda && (
+        <div class="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-900/40">
+          <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+            🏠 Los datos oficiales de esta serie, en vivo
+          </h3>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Precio (IPV), compraventas, lanzamientos, ejecuciones y esfuerzo de alquiler, por CCAA y municipio.
+          </p>
+          <a
+            href="https://vivienda.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-5 py-2 text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500"
+          >
+            Abrir el observatorio de vivienda →
+          </a>
+        </div>
+      )}
+
+      {seguirLeyendo.length > 0 && (
+        <section class="mt-10">
+          <h2 class="font-serif text-2xl font-bold text-slate-900 dark:text-white">Sigue leyendo</h2>
+          <div class="mt-5 grid gap-4 sm:grid-cols-2">
+            {seguirLeyendo.map((p) => (
+              <a href={`/posts/${p.slug}/`} class="group block rounded-2xl border border-slate-200 p-6 transition hover:border-accent-600 dark:border-slate-800 dark:hover:border-accent-400">
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">{p.data.categoria}</span>
+                <h3 class="mt-2 font-serif text-xl font-bold text-slate-900 group-hover:text-accent-700 dark:text-white dark:group-hover:text-accent-400">
+                  {p.data.title}
+                </h3>
+                {p.data.description && (
+                  <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{p.data.description}</p>
+                )}
+                <span class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-accent-600 dark:text-accent-400">
+                  Leer <span class="transition group-hover:translate-x-1">→</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {faq.length > 0 && (
+        <section class="mt-10 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+          <h2 class="font-serif text-2xl font-bold text-slate-900 dark:text-white">Preguntas frecuentes</h2>
+          <dl class="mt-4 space-y-4">
+            {faq.map((f) => (
+              <div>
+                <dt class="font-semibold text-slate-900 dark:text-white">{f.q}</dt>
+                <dd class="mt-1 text-slate-600 dark:text-slate-300">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+
+      <CommentList slug={post.slug} />
+      <CommentForm slug={post.slug} />
+    </article>
+
+    <Sidebar />
+  </div>
+</Layout>
