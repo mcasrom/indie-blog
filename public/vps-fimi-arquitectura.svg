@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1080" role="img" aria-labelledby="titulo desc">
+  <title id="titulo">Arquitectura de FIMI en un VPS de 4 GB</title>
+  <desc id="desc">Un cron cada seis horas alimenta varios colectores; los datos se guardan en SQLite, pasan por el pipeline de scoring y clustering, y salen como dashboard, API y exportaciones. Debajo, los elementos que sostienen el sistema: logs, salud de fuentes, copias y protección ante OOM.</desc>
+  <defs>
+    <marker id="flecha" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .eyebrow { font: 700 15px Lato, 'Liberation Sans', Arial, sans-serif; letter-spacing: 2.5px; fill: #0f766e; }
+      .title { font: 700 34px Georgia, 'Liberation Serif', serif; fill: #0f172a; }
+      .sub { font: 400 19px Lato, 'Liberation Sans', Arial, sans-serif; fill: #475569; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .box-accent { fill: #f0fdfa; stroke: #5eead4; stroke-width: 1.5; }
+      .num { font: 700 15px Lato, 'Liberation Sans', Arial, sans-serif; fill: #0f766e; letter-spacing: 1px; }
+      .label { font: 700 27px Lato, 'Liberation Sans', Arial, sans-serif; fill: #0f172a; }
+      .item { font: 400 20px Lato, 'Liberation Sans', Arial, sans-serif; fill: #475569; }
+      .mono { font: 400 18px 'Liberation Mono', 'DejaVu Sans Mono', monospace; fill: #334155; }
+      .arrow { stroke: #0f766e; stroke-width: 2.5; fill: none; marker-end: url(#flecha); }
+      .band { fill: #ecfdf5; stroke: #99f6e4; stroke-width: 1.5; }
+      .pill { fill: #ffffff; stroke: #99f6e4; stroke-width: 1.2; }
+      .pilltext { font: 600 17px Lato, 'Liberation Sans', Arial, sans-serif; fill: #115e59; }
+      .foot { font: 400 15px Lato, 'Liberation Sans', Arial, sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="760" height="1080"/>
+  <text class="eyebrow" x="40" y="42">FIMI · MANTENIMIENTO</text>
+  <text class="title" x="40" y="82">Un pipeline de una persona,</text>
+  <text class="title" x="40" y="120">cada 6 horas</text>
+  <text class="sub" x="40" y="150">La parte visible es pequeña. La que hay que sostener, no.</text>
+
+  <rect class="box" x="40" y="180" width="680" height="108" rx="12"/>
+  <text class="num" x="64" y="208">01</text>
+  <text class="label" x="100" y="210">cron</text>
+  <text class="item" x="100" y="240">cada 6 h</text>
+  <text class="mono" x="100" y="268">00:30 · 06:30 · 12:30 · 18:30</text>
+
+  <path class="arrow" d="M380 288 V304"/>
+
+  <rect class="box" x="40" y="306" width="680" height="108" rx="12"/>
+  <text class="num" x="64" y="334">02</text>
+  <text class="label" x="100" y="336">colectores</text>
+  <text class="item" x="100" y="366">RSS · Bluesky · Telegram</text>
+  <text class="item" x="100" y="392">Reddit · Google News</text>
+
+  <path class="arrow" d="M380 414 V430"/>
+
+  <rect class="box-accent" x="40" y="432" width="680" height="108" rx="12"/>
+  <text class="num" x="64" y="460">03</text>
+  <text class="label" x="100" y="462">SQLite</text>
+  <text class="item" x="100" y="492">events · clusters</text>
+  <text class="item" x="100" y="518">accesos · lineage</text>
+
+  <path class="arrow" d="M380 540 V556"/>
+
+  <rect class="box" x="40" y="558" width="680" height="108" rx="12"/>
+  <text class="num" x="64" y="586">04</text>
+  <text class="label" x="100" y="588">pipeline</text>
+  <text class="item" x="100" y="618">features · scoring</text>
+  <text class="item" x="100" y="644">clustering · bandas</text>
+
+  <path class="arrow" d="M380 666 V682"/>
+
+  <rect class="box" x="40" y="684" width="680" height="108" rx="12"/>
+  <text class="num" x="64" y="712">05</text>
+  <text class="label" x="100" y="714">salidas</text>
+  <text class="item" x="100" y="744">dashboard · API</text>
+  <text class="item" x="100" y="770">CSV · JSON · GEXF</text>
+
+  <rect class="band" x="40" y="820" width="680" height="210" rx="16"/>
+  <text class="eyebrow" x="64" y="856">LO QUE NO SE VE EN EL PANEL</text>
+  <text class="sub" x="64" y="884">Esto es lo que evita que el sistema se degrade sin avisar.</text>
+
+  <rect class="pill" x="64" y="904" width="300" height="48" rx="24"/>
+  <text class="pilltext" x="86" y="935">logs con salida</text>
+
+  <rect class="pill" x="380" y="904" width="316" height="48" rx="24"/>
+  <text class="pilltext" x="402" y="935">salud de fuentes</text>
+
+  <rect class="pill" x="64" y="962" width="190" height="48" rx="24"/>
+  <text class="pilltext" x="86" y="993">copias</text>
+
+  <rect class="pill" x="270" y="962" width="240" height="48" rx="24"/>
+  <text class="pilltext" x="292" y="993">oom_score_adj</text>
+
+  <text class="foot" x="40" y="1054">FIMI · observatorio de amplificación · un VPS de 4 GB · 9 temas · 93 fuentes</text>
+  <text class="foot" x="40" y="1076">El pipeline escribe en SQLite; el dashboard y la API leen de ahí.</text>
+</svg>

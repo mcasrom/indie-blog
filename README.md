@@ -5,6 +5,12 @@ hecho con intención, que puedes entender, probar y modificar.
 
 **Sitio:** https://indie.pruebapublica.com
 
+## Entradas publicadas
+
+- [¿Qué significa «indie» en el mundo Linux?](https://indie.pruebapublica.com/posts/que-significa-indie-en-linux/)
+- [Cómo decido si una herramienta indie merece la pena: 6 filtros](https://indie.pruebapublica.com/posts/como-evaluar-herramienta-indie-6-filtros/)
+- [Mantener un observatorio indie en un VPS de 4 GB](https://indie.pruebapublica.com/posts/mantener-observatorio-indie-vps-4gb/)
+
 ## Stack
 
 - **Astro** (SSG) + **TailwindCSS v4**. Sin frameworks pesados.
@@ -55,6 +61,12 @@ nuevas, enviar `/sitemap-0.xml` a IndexNow.
 Crear `src/content/posts/<slug>/index.md` con el frontmatter del esquema
 (`src/content.config.ts`): `title`, `description`, `pubDate`, `tags`, `categoria`,
 `image`, `draft`. Las etiquetas válidas del blog están en `src/lib/indie.ts`.
+
+## Cross-promo
+
+Los enlaces a otros proyectos del ecosistema (FIMI, vivienda, municipal, NearMe,
+29N, agenda) llevan `utm_source=indie&utm_medium=crosspromo`. El blog de análisis
+usa `utm_source=analisis`; no mezclar.
 
 ## Licencia
 

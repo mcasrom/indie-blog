@@ -198,7 +198,7 @@ const faqLd = faq.length
   <a href="/" class="text-sm text-slate-500 hover:text-accent-600 dark:hover:text-accent-400">← Volver</a>
 
   <div class="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
-    <article>
+    <article class="min-w-0">
       <header>
         <div class="flex items-center gap-3 text-sm text-slate-500">
           <time datetime={post.data.pubDate.toISOString()}>{fmt.format(post.data.pubDate)}</time>
@@ -336,7 +336,7 @@ const faqLd = faq.length
           </h3>
           <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{fimiTema.desc}</p>
           <a
-            href={`https://fimi.viajeinteligencia.com/?utm_source=analisis&utm_medium=crosspromo#${fimiPostMap[post.slug]}`}
+            href={`https://fimi.viajeinteligencia.com/?utm_source=indie&utm_medium=crosspromo#${fimiPostMap[post.slug]}`}
             target="_blank"
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-2 rounded-full bg-accent-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-accent-700 dark:bg-accent-400 dark:hover:bg-accent-500"
@@ -355,7 +355,7 @@ const faqLd = faq.length
             Precio (IPV), compraventas, lanzamientos, ejecuciones y esfuerzo de alquiler, por CCAA y municipio.
           </p>
           <a
-            href="https://vivienda.pruebapublica.com/?utm_source=analisis&utm_medium=crosspromo"
+            href="https://vivienda.pruebapublica.com/?utm_source=indie&utm_medium=crosspromo"
             target="_blank"
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-5 py-2 text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500"
