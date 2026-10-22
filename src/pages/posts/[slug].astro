@@ -192,9 +192,9 @@ const faqLd = faq.length
   url={postUrl}
   wide
 >
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} slot="head" />
-  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} slot="head" />}
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')} slot="head" />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')} slot="head" />
+  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')} slot="head" />}
   <a href="/" class="text-sm text-slate-500 hover:text-accent-600 dark:hover:text-accent-400">← Volver</a>
 
   <div class="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">

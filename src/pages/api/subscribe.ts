@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonError({ request } as any, 400, 'bad_json', 'JSON inválido.');
   }
   const email = (body.email || '').trim().toLowerCase().slice(0, 200);
-  if (!email || !EMAIL_RE.test(email)) {
+  if (!email || /[<>"']/.test(email) || !EMAIL_RE.test(email)) {
     return jsonError({ request } as any, 400, 'email_invalido', 'Introduce un email válido.');
   }
   const temas = sanearTemas(body.temas);

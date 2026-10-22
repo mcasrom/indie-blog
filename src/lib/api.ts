@@ -1,5 +1,6 @@
 // src/lib/api.ts
 // Helpers para endpoints API: rate-limit simple por IP y respuestas JSON.
+import { isIP } from 'node:net';
 import type { APIContext } from 'astro';
 
 const hits = new Map<string, { n: number; reset: number }>();
@@ -15,8 +16,12 @@ export function rateLimit(ip: string, max = 30, windowMs = 10 * 60 * 1000): bool
 
 export function clientIp(context: APIContext): string {
   const fwd = context.request.headers.get('x-forwarded-for');
-  if (fwd) return fwd.split(',')[0].trim();
-  return context.clientAddress || 'unknown';
+  if (fwd) {
+    const ip = fwd.split(',')[0].trim();
+    if (isIP(ip)) return ip;
+  }
+  const addr = context.clientAddress;
+  return isIP(addr) ? addr : 'unknown';
 }
 
 export function jsonError(context: APIContext, status: number, error: string, message: string) {

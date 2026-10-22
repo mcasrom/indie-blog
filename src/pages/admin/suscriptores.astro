@@ -5,7 +5,6 @@ import { countSubscribers } from '../../lib/subscribers';
 export const prerender = false;
 
 const total = countSubscribers();
-const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 ---
 <Layout title="Suscriptores newsletter" url="/admin/suscriptores/">
   <script>
@@ -18,6 +17,11 @@ const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', y
     }
     if (!secret) setSecret();
 
+    const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+
     async function cargar() {
       const r = await fetch('/api/admin/subscribers', {
         headers: { 'x-admin-secret': secret },
@@ -28,10 +32,10 @@ const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', y
       document.querySelector('#lista').innerHTML = data.suscriptores.map((s) => `
         <li class="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
           <div class="flex items-baseline justify-between gap-3">
-            <span class="font-semibold text-slate-900 dark:text-white">${s.email}</span>
+            <span class="font-semibold text-slate-900 dark:text-white">${esc(s.email)}</span>
             <span class="text-xs text-slate-400">${fmt.format(new Date(s.fecha))}</span>
           </div>
-          <span class="text-xs text-slate-500">ip: ${s.ip || '—'}</span>
+          <span class="text-xs text-slate-500">ip: ${esc(s.ip || '—')}</span>
           ${s.confirmado ? '' : '<span class="ml-3 text-xs font-medium text-amber-600">sin confirmar</span>'}
         </li>
       `).join('');

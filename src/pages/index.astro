@@ -40,7 +40,7 @@ const jsonLd = {
 };
 ---
 <Layout title="Linux, self-hosting y software hecho a mano" description="Un espacio práctico y sin ruido sobre Linux, Debian, self-hosting, homelab y herramientas indie." url="/" wide>
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')} slot="head" />
   <!-- Hero -->
   <section class="mx-auto max-w-3xl py-10 text-center">
     <p class="text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400">
