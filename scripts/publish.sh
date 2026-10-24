@@ -1,70 +1,74 @@
 #!/usr/bin/env bash
-# scripts/publish.sh
-# Publica un post del blog: toma un .md de la cola, lo mueve a content/posts,
-# hace build y reinicia PM2.
-#
-# Uso:
-#   scripts/publish.sh <archivo.md>
-# Ejemplo:
-#   scripts/publish.sh borrador-titulo.md   (desde la raíz del proyecto)
-#
-# El slug sale del nombre del archivo: "mi-post.md" -> /posts/mi-post/
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DRAFTS_DIR="${PROJECT_DIR}/borradores"
-POSTS_DIR="${PROJECT_DIR}/src/content/posts"
+POSTS_DIR="$PROJECT_DIR/src/content/posts"
+DRAFTS_DIR="$PROJECT_DIR/borradores"
 
-if [ $# -lt 1 ]; then
-  echo "Uso: scripts/publish.sh <archivo.md>"
-  echo "Busca el archivo en borradores/ o en la raíz del proyecto."
+DRY=0
+if [[ "${1:-}" == "--dry" ]]; then
+  DRY=1
+  shift
+fi
+
+if [[ $# -lt 1 ]]; then
+  echo "Uso: scripts/publish.sh [--dry] <archivo.md|directorio>"
   exit 1
 fi
 
-FILE="$1"
+SRC="$1"
+if [[ ! -e "$SRC" ]]; then
+  if [[ -e "$DRAFTS_DIR/$SRC" ]]; then
+    SRC="$DRAFTS_DIR/$SRC"
+  elif [[ -e "$PROJECT_DIR/$SRC" ]]; then
+    SRC="$PROJECT_DIR/$SRC"
+  else
+    echo "ERROR: no encuentro '$SRC' (ni en borradores/ ni en la raíz)" >&2
+    exit 1
+  fi
+fi
 
-# Localizar el archivo: si es ruta absoluta, usarla; si no, buscar en borradores/ o raíz.
-SRC=""
-if [ -f "$FILE" ]; then
-  SRC="$FILE"
-elif [ -f "${DRAFTS_DIR}/${FILE}" ]; then
-  SRC="${DRAFTS_DIR}/${FILE}"
-elif [ -f "${PROJECT_DIR}/${FILE}" ]; then
-  SRC="${PROJECT_DIR}/${FILE}"
+if [[ -d "$SRC" ]]; then
+  if [[ ! -f "$SRC/index.md" ]]; then
+    echo "ERROR: el directorio no contiene index.md" >&2
+    exit 1
+  fi
+  SLUG="$(basename "$SRC")"
+  DEST="$POSTS_DIR/$SLUG"
+  FRONT="$SRC/index.md"
 else
-  echo "ERROR: No encuentro '$FILE'. ¿Está en borradores/ o en la raíz?"
+  if [[ "$SRC" != *.md ]]; then
+    echo "ERROR: debe ser un .md o un directorio con index.md" >&2
+    exit 1
+  fi
+  SLUG="$(basename "$SRC" .md)"
+  DEST="$POSTS_DIR/$SLUG.md"
+  FRONT="$SRC"
+fi
+
+if [[ -e "$DEST" ]]; then
+  echo "ERROR: ya existe $DEST" >&2
+  exit 1
+fi
+if ! grep -qE '^title:' "$FRONT"; then
+  echo "ERROR: falta 'title:' en el frontmatter" >&2
+  exit 1
+fi
+if ! grep -qE '^pubDate:' "$FRONT"; then
+  echo "ERROR: falta 'pubDate:' en el frontmatter" >&2
   exit 1
 fi
 
-SLUG="$(basename "$SRC" .md)"
-DEST="${POSTS_DIR}/${SLUG}.md"
-
-# Validar que no exista ya un post con ese slug
-if [ -f "$DEST" ]; then
-  echo "ERROR: Ya existe src/content/posts/${SLUG}.md"
-  exit 1
+if [[ "$DRY" -eq 1 ]]; then
+  echo "[dry] publicaría $SLUG → $DEST"
+  echo "[dry] build y deploy omitidos"
+  exit 0
 fi
 
-echo "==> Publicando: ${SLUG}"
+echo "==> Publicando: $SLUG"
 mkdir -p "$POSTS_DIR"
 mv "$SRC" "$DEST"
 
-# Validar frontmatter básico (title, pubDate)
-if ! grep -qE '^title:' "$DEST"; then
-  echo "ERROR: Falta 'title:' en el frontmatter. Revisa el archivo."
-  exit 1
-fi
-if ! grep -qE '^pubDate:' "$DEST"; then
-  echo "ERROR: Falta 'pubDate:' en el frontmatter. Revisa el archivo."
-  exit 1
-fi
+bash "$PROJECT_DIR/scripts/deploy.sh"
 
-echo "==> Build..."
-cd "$PROJECT_DIR"
-npm run build
-
-echo "==> Reiniciando PM2..."
-source .env 2>/dev/null || true
-ADMIN_SECRET="${ADMIN_SECRET:-}" PORT=3018 HOST=0.0.0.0 pm2 restart analisis-pub --update-env >/dev/null 2>&1
-
-echo "==> Publicado: https://analisis.pruebapublica.com/posts/${SLUG}/"
+echo "==> Publicado: https://indie.pruebapublica.com/posts/${SLUG}/"

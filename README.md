@@ -48,13 +48,33 @@ npm run build      # genera dist/
 ## Despliegue
 
 ```bash
-npm run build
-rsync -a --delete dist/client/ /var/www/indie/
-pm2 restart indie-blog      # solo si cambian endpoints o assets de /public
+bash scripts/deploy.sh                 # build + guardas + rsync a /var/www/indie
+bash scripts/deploy.sh --restart-api   # además reinicia la API (si cambian endpoints)
 ```
+
+`deploy.sh` compila, comprueba que la portada generada sea de indie y **rechaza**
+el marcador del blog de análisis, publica en `/var/www/indie` y verifica que
+todos los posts generados estén servidos. La API (`indie-blog`, `:3020`) no se
+reinicia por defecto: un post estático no la necesita.
+
+> **No mezclar raíces.** Este blog se sirve desde `/var/www/indie`. El blog de
+> análisis se sirve desde `/home/deploy/analisis-pruebapublica/dist/client` y
+> **no** debe rsyncarse aquí. Las guardas de `deploy.sh` abortan si detectan un
+> build de análisis.
 
 Tras desplegar: purgar caché de Cloudflare (`pruebapublica`) y, si hay páginas
 nuevas, enviar `/sitemap-0.xml` a IndexNow.
+
+## Publicar un post
+
+```bash
+bash scripts/publish.sh --dry borradores/<slug>.md   # validar, sin mover ni publicar
+bash scripts/publish.sh borradores/<slug>.md         # mover + build + deploy
+```
+
+Acepta un `.md` suelto o un directorio con `index.md` (para posts con imagen).
+Valida `title` y `pubDate`, evita sobrescribir un slug existente y llama a
+`scripts/deploy.sh`.
 
 ## Añadir un post
 
