@@ -33,7 +33,7 @@ const temas = [...porTag.entries()]
 const todasLasTags = porTag.size;
 const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
-<Layout title="Categorías · Temas del blog" url="/categorias/">
+<Layout noindex title="Categorías · Temas del blog" url="/categorias/">
   <h1 class="font-serif text-4xl font-bold text-slate-900 dark:text-white">Temas del blog</h1>
   <p class="mt-2 text-slate-600 dark:text-slate-400">
     {temas.length} áreas temáticas con {todasLasTags} etiquetas en total · cada una enlaza a su página de artículos.

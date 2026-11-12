@@ -31,7 +31,7 @@ const temas = [...porTag.values()].sort(
 );
 const totalPosts = temas.reduce((n, t) => n + t.posts.length, 0);
 ---
-<Layout title="Etiquetas · Temas del blog" url="/tags/">
+<Layout noindex title="Etiquetas · Temas del blog" url="/tags/">
   <h1 class="font-serif text-4xl font-bold text-slate-900 dark:text-white">Etiquetas</h1>
   <p class="mt-2 text-slate-600 dark:text-slate-400">
     {temas.length} etiquetas sobre {posts.length} artículos. Cada etiqueta agrupa los posts que la usan.

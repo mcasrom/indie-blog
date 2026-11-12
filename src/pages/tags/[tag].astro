@@ -27,7 +27,7 @@ const posts = (await getCollection('posts')).filter((p) => !p.data.draft)
 const fmt = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 const tagTitulo = tag.replace(/-/g, ' ');
 ---
-<Layout title={`#${tagTitulo} · Artículos`} url={`/tags/${tag}/`}>
+<Layout noindex title={`#${tagTitulo} · Artículos`} url={`/tags/${tag}/`}>
   <p class="text-sm text-slate-500">
     <a href="/" class="hover:text-accent-600">← Volver</a>
   </p>

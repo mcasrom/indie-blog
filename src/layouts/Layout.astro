@@ -11,6 +11,7 @@ interface Props {
   type?: string;
   url?: string;
   wide?: boolean;
+  noindex?: boolean;
 }
 const {
   title,
@@ -19,6 +20,7 @@ const {
   type = 'website',
   url = 'https://indie.pruebapublica.com/',
   wide = false,
+  noindex = false,
 } = Astro.props;
 
 const fullTitle = `${title} | indie`;
@@ -28,7 +30,7 @@ const fullImage = image.startsWith('http') ? image : siteUrl + image;
 const fullUrl = url.startsWith('http') ? url : siteUrl + url;
 // Páginas internas (admin): no indexar. OJO: robots.txt NO debe bloquear
 // /admin/, o Google no podría rastrear y leer este noindex (seguiría indexada).
-const noindex = url.startsWith('/admin');
+const noindexPage = noindex || url.startsWith('/admin');
 ---
 <!DOCTYPE html>
 <html lang="es" class="light">
@@ -38,7 +40,7 @@ const noindex = url.startsWith('/admin');
   <title>{fullTitle}</title>
   <meta name="description" content={trimmedDesc} />
   <meta name="google-site-verification" content="mlyuKtDMOhZ2x2lMrqr-MHT9LeUW8i6uEJw1Sv6AzNY" />
-  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  {noindexPage && <meta name="robots" content="noindex, nofollow" />}
 
   <!-- PWA -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
